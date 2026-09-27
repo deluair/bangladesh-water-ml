@@ -103,18 +103,20 @@ augmentation scores 0.049.
 **Step 4, teach it Bangladesh.** The fix is to show the model Bangladesh. The 61 chips are split in two groups; the
 model is fine-tuned on one group and scored on the other, then the roles swap, so **every chip is scored by a model that
 never saw it**. The groups are formed by Sentinel-2 tile (so the test chips come from places the model never saw) or,
-separately, by date (so they come from days it never saw). Each variant ran with three seeds.
+separately, by date (so they come from days it never saw). Each variant ran with three seeds, twice: once on an Apple
+M-series GPU (`a2_bd/bd_finetune.py`) and once on a Colab L4 GPU (notebook 03, as committed). GPU arithmetic is not
+bit-identical across hardware, so the two runs differ slightly.
 
-| Fine-tuning variant (about 30 training chips each time) | IoU, mean ± sd of 3 seeds | Otsu |
-|---|---|---|
-| Starting from the Sen1Floods11 model, held-out tiles | **0.815 ± 0.004** | 0.525 |
-| Starting from the Sen1Floods11 model, held-out dates | **0.823 ± 0.009** | 0.525 |
-| Starting from a generic ImageNet network, held-out tiles | 0.814 ± 0.011 | 0.525 |
-| Starting from a generic ImageNet network, held-out dates | 0.809 ± 0.008 | 0.525 |
+| Fine-tuning variant (about 30 training chips each time) | IoU, Apple GPU (mean ± sd, 3 seeds) | IoU, Colab L4 | Otsu |
+|---|---|---|---|
+| Starting from the Sen1Floods11 model, held-out tiles | **0.815 ± 0.004** | **0.830 ± 0.004** | 0.525 |
+| Starting from the Sen1Floods11 model, held-out dates | **0.823 ± 0.009** | **0.823 ± 0.009** | 0.525 |
+| Starting from a generic ImageNet network, held-out tiles | 0.814 ± 0.011 | 0.820 ± 0.004 | 0.525 |
+| Starting from a generic ImageNet network, held-out dates | 0.809 ± 0.008 | 0.801 ± 0.021 | 0.525 |
 
-About 30 local chips take the model from far below Otsu to well above it. Whether it starts from the global flood model
-or from a generic image network barely matters (about 0.01): **the local labels do the work, the global training set
-adds little here.** That is the practical lesson for anyone mapping floods in Bangladesh with open radar.
+About 30 local chips take the model from far below Otsu (0.525) to 0.80–0.83. Whether it starts from the global flood
+model or from a generic image network barely matters (at most 0.022 IoU in either run): **the local labels do the work,
+the global training set adds little here.** That is the practical lesson for anyone mapping floods in Bangladesh with open radar.
 
 ### Where AI is and is not used
 

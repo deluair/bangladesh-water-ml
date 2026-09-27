@@ -122,7 +122,7 @@ summary['otsu'] = round(OTSU, 3); summary"""),
 radar product is calibrated differently (gamma0 RTC, not the sigma0 GEE product Sen1Floods11 uses; over Bangladesh land
 it reads about 3.5 dB (VV) and 5 dB (VH) brighter) and the model leans on speckle texture. Otsu survives because a per-chip threshold
 ignores calibration offsets. About 30 Bangladesh chips per fold are enough to lift the U-Net well past Otsu; whether the
-encoder starts from Sen1Floods11 or ImageNet changes the result by about 0.01, so the local labels do the work."""),
+encoder starts from Sen1Floods11 or ImageNet changes the result by at most about 0.02, so the local labels do the work."""),
 ]
 nb = nbf.v4.new_notebook(); nb.cells = cells
 nb.metadata = {"accelerator": "GPU", "colab": {"provenance": []}, "kernelspec": {"name": "python3", "display_name": "Python 3"}}
