@@ -1,0 +1,14 @@
+{
+  "window_scan_count": 1021,
+  "kept_high": 58,
+  "kept_low": 20,
+  "skip_reasons": {
+    "no_overlap_bd": 44,
+    "outside_bd": 310,
+    "water_frac_out_of_range": 89,
+    "nodata_frac": 425,
+    "s1_invalid": 119
+  },
+  "elapsed_sec": 1481.6556861400604,
+  "n_pairs_used": 101
+}

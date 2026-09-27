@@ -1,0 +1,29 @@
+split date init s1f11 device mps | tiles 8 | chips per fold [34, 27]
+seed 20260927 fold 0: trained on 27 chips, tested on 34, 24s
+seed 20260927 fold 1: trained on 34 chips, tested on 27, 30s
+seed 1 fold 0: trained on 27 chips, tested on 34, 23s
+seed 1 fold 1: trained on 34 chips, tested on 27, 29s
+seed 2 fold 0: trained on 27 chips, tested on 34, 24s
+seed 2 fold 1: trained on 34 chips, tested on 27, 30s
+pooled IoU per seed (all 61 chips, each scored out-of-tile): {1: 0.817, 2: 0.818, 20260927: 0.834}
+fine-tuned U-Net mean 0.823 sd 0.009 | Otsu 0.525
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+split tile init imagenet device mps | tiles 19 | chips per fold [31, 30]
+seed 20260927 fold 0: trained on 30 chips, tested on 31, 27s
+seed 20260927 fold 1: trained on 31 chips, tested on 30, 27s
+seed 1 fold 0: trained on 30 chips, tested on 31, 26s
+seed 1 fold 1: trained on 31 chips, tested on 30, 27s
+seed 2 fold 0: trained on 30 chips, tested on 31, 26s
+seed 2 fold 1: trained on 31 chips, tested on 30, 27s
+pooled IoU per seed (all 61 chips, each scored out-of-tile): {1: 0.814, 2: 0.802, 20260927: 0.825}
+fine-tuned U-Net mean 0.814 sd 0.011 | Otsu 0.525
+split date init imagenet device mps | tiles 8 | chips per fold [34, 27]
+seed 20260927 fold 0: trained on 27 chips, tested on 34, 24s
+seed 20260927 fold 1: trained on 34 chips, tested on 27, 30s
+seed 1 fold 0: trained on 27 chips, tested on 34, 23s
+seed 1 fold 1: trained on 34 chips, tested on 27, 30s
+seed 2 fold 0: trained on 27 chips, tested on 34, 23s
+seed 2 fold 1: trained on 34 chips, tested on 27, 30s
+pooled IoU per seed (all 61 chips, each scored out-of-tile): {1: 0.8, 2: 0.815, 20260927: 0.811}
+fine-tuned U-Net mean 0.809 sd 0.008 | Otsu 0.525
+EXIT 0

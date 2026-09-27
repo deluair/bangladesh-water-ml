@@ -1,0 +1,5 @@
+a1_full.log
+__pycache__/
+.ipynb_checkpoints/
+models/*.pt
+release/

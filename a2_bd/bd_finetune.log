@@ -1,0 +1,10 @@
+device mps | tiles 19 | chips per fold [31, 30]
+seed 20260927 fold 0: trained on 30 chips, tested on 31, 32s
+seed 20260927 fold 1: trained on 31 chips, tested on 30, 28s
+seed 1 fold 0: trained on 30 chips, tested on 31, 26s
+seed 1 fold 1: trained on 31 chips, tested on 30, 27s
+seed 2 fold 0: trained on 30 chips, tested on 31, 26s
+seed 2 fold 1: trained on 31 chips, tested on 30, 27s
+pooled IoU per seed (all 61 chips, each scored out-of-tile): {1: 0.81, 2: 0.815, 20260927: 0.818}
+fine-tuned U-Net mean 0.815 sd 0.004 | Otsu 0.525
+EXIT 0

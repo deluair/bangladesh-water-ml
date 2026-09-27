@@ -1,0 +1,7 @@
+set,seed,chips,unet_iou,otsu_iou,unet_chip_mean_iou,otsu_chip_mean_iou
+Sen1Floods11 test,20260927,90,0.661,0.21,0.401,0.21
+Sen1Floods11 test,1,90,0.665,0.21,0.406,0.21
+Sen1Floods11 test,2,90,0.666,0.21,0.401,0.21
+Bolivia hold-out,20260927,15,0.648,0.351,0.44,0.363
+Bolivia hold-out,1,15,0.698,0.351,0.459,0.363
+Bolivia hold-out,2,15,0.697,0.351,0.466,0.363
