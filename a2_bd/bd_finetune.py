@@ -59,5 +59,5 @@ for i in range(len(q)):
     x, y = X[i][0], Y[i]; v = (y >= 0) & (x > -50); t = y == 1; po = (x < threshold_otsu(x[v])) & v
     oI += (po & t & v).sum(); oU += ((po | t) & v).sum()
 per = r.groupby('seed').apply(lambda d: d.I.sum() / d.U.sum())
-print('pooled IoU per seed (all 61 chips, each scored out-of-tile):', per.round(3).to_dict())
+print(f'pooled IoU per seed (all {len(q)} chips, each scored out-of-{SPLIT}):', per.round(3).to_dict())
 print(f'fine-tuned U-Net mean {per.mean():.3f} sd {per.std():.3f} | Otsu {oI/oU:.3f}')

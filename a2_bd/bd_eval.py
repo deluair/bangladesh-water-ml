@@ -14,7 +14,8 @@ for i in ids:
     vv = x[0]; vo = v & (vv > -50); th = threshold_otsu(vv[vo]); po = (vv < th) & vo
     a, b = (p & t & v).sum(), ((p | t) & v).sum(); c, d = (po & t & vo).sum(), ((po | t) & vo).sum()
     I += a; U += b; oI += c; oU += d
-    rows.append(dict(id=i, water_frac=round(t[v].mean(), 3), unet_iou=round(a / b, 3) if b else np.nan, otsu_iou=round(c / d, 3) if d else np.nan))
+    rows.append(dict(id=i, water_frac=round(t[v].mean(), 3), unet_iou=round(a / b, 3) if b else np.nan, otsu_iou=round(c / d, 3) if d else np.nan,
+                unet_I=int(a), unet_U=int(b), otsu_I=int(c), otsu_U=int(d)))
 r = pd.DataFrame(rows); r.to_csv(sys.argv[3], index=False)
 print(f'chips {len(r)}  pooled IoU unet {I/U:.3f} otsu {oI/oU:.3f}  chip-mean unet {r.unet_iou.mean():.3f} otsu {r.otsu_iou.mean():.3f}')
 print(r.sort_values('unet_iou').to_string(index=False))
