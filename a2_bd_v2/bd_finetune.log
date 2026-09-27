@@ -1,0 +1,45 @@
+=== SPLIT=tile INIT=s1f11 start Sun Sep 27 17:05:14 EDT 2026
+split tile init s1f11 device mps | tiles 27 | chips per fold [162, 161]
+seed 20260927 fold 0: trained on 161 chips, tested on 162, 142s
+seed 20260927 fold 1: trained on 162 chips, tested on 161, 142s
+seed 1 fold 0: trained on 161 chips, tested on 162, 138s
+seed 1 fold 1: trained on 162 chips, tested on 161, 140s
+seed 2 fold 0: trained on 161 chips, tested on 162, 139s
+seed 2 fold 1: trained on 162 chips, tested on 161, 142s
+pooled IoU per seed (all 323 chips, each scored out-of-tile): {1: 0.806, 2: 0.806, 20260927: 0.793}
+fine-tuned U-Net mean 0.802 sd 0.008 | Otsu 0.472
+EXIT 0
+=== SPLIT=date INIT=s1f11 start Sun Sep 27 17:19:22 EDT 2026
+split date init s1f11 device mps | tiles 36 | chips per fold [162, 161]
+seed 20260927 fold 0: trained on 161 chips, tested on 162, 141s
+seed 20260927 fold 1: trained on 162 chips, tested on 161, 140s
+seed 1 fold 0: trained on 161 chips, tested on 162, 139s
+seed 1 fold 1: trained on 162 chips, tested on 161, 139s
+seed 2 fold 0: trained on 161 chips, tested on 162, 139s
+seed 2 fold 1: trained on 162 chips, tested on 161, 140s
+pooled IoU per seed (all 323 chips, each scored out-of-date): {1: 0.804, 2: 0.809, 20260927: 0.803}
+fine-tuned U-Net mean 0.805 sd 0.003 | Otsu 0.472
+EXIT 0
+=== SPLIT=tile INIT=imagenet start Sun Sep 27 17:33:23 EDT 2026
+split tile init imagenet device mps | tiles 27 | chips per fold [162, 161]
+seed 20260927 fold 0: trained on 161 chips, tested on 162, 139s
+seed 20260927 fold 1: trained on 162 chips, tested on 161, 139s
+seed 1 fold 0: trained on 161 chips, tested on 162, 139s
+seed 1 fold 1: trained on 162 chips, tested on 161, 139s
+seed 2 fold 0: trained on 161 chips, tested on 162, 139s
+seed 2 fold 1: trained on 162 chips, tested on 161, 140s
+pooled IoU per seed (all 323 chips, each scored out-of-tile): {1: 0.796, 2: 0.797, 20260927: 0.803}
+fine-tuned U-Net mean 0.799 sd 0.004 | Otsu 0.472
+EXIT 0
+=== SPLIT=date INIT=imagenet start Sun Sep 27 17:47:22 EDT 2026
+split date init imagenet device mps | tiles 36 | chips per fold [162, 161]
+seed 20260927 fold 0: trained on 161 chips, tested on 162, 139s
+seed 20260927 fold 1: trained on 162 chips, tested on 161, 140s
+seed 1 fold 0: trained on 161 chips, tested on 162, 138s
+seed 1 fold 1: trained on 162 chips, tested on 161, 139s
+seed 2 fold 0: trained on 161 chips, tested on 162, 139s
+seed 2 fold 1: trained on 162 chips, tested on 161, 139s
+pooled IoU per seed (all 323 chips, each scored out-of-date): {1: 0.805, 2: 0.808, 20260927: 0.809}
+fine-tuned U-Net mean 0.807 sd 0.002 | Otsu 0.472
+EXIT 0
+TOTAL_SECONDS 3491

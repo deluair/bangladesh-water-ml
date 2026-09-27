@@ -5,6 +5,8 @@ from skimage.filters import threshold_otsu
 MU = np.array([-11.188685, -17.898247], 'float32'); SD = np.array([6.83887, 6.5755134], 'float32')
 dev = 'mps' if torch.backends.mps.is_available() else 'cpu'
 q = pd.read_csv('qc_decisions.csv'); q = q[q.decision == 'keep'].reset_index(drop=True)
+if os.path.exists('dedupe_dropped.csv'):  # v2: chips that are the same ESA acquisition reprocessed, see step2c_dedupe.py
+    dropped = set(pd.read_csv('dedupe_dropped.csv').id); q = q[~q.id.isin(dropped)].reset_index(drop=True)
 q['tile'] = q.id.str.extract(r'_(T\d\d[A-Z]{3})_')[0]
 SPLIT, INIT = os.environ.get("SPLIT", "tile"), os.environ.get("INIT", "s1f11")
 if SPLIT == "date": q["tile"] = q.id.str[3:11]   # group by S2 acquisition date instead of tile
@@ -59,5 +61,5 @@ for i in range(len(q)):
     x, y = X[i][0], Y[i]; v = (y >= 0) & (x > -50); t = y == 1; po = (x < threshold_otsu(x[v])) & v
     oI += (po & t & v).sum(); oU += ((po | t) & v).sum()
 per = r.groupby('seed').apply(lambda d: d.I.sum() / d.U.sum())
-print('pooled IoU per seed (all 61 chips, each scored out-of-tile):', per.round(3).to_dict())
+print(f'pooled IoU per seed (all {len(q)} chips, each scored out-of-{SPLIT}):', per.round(3).to_dict())
 print(f'fine-tuned U-Net mean {per.mean():.3f} sd {per.std():.3f} | Otsu {oI/oU:.3f}')

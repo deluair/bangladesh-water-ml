@@ -1,0 +1,5 @@
+chips 323  pooled IoU unet 0.266 otsu 0.472  chip-mean unet 0.285 otsu 0.432
+chips 323  pooled IoU unet 0.161 otsu 0.472  chip-mean unet 0.258 otsu 0.432
+chips 323  pooled IoU unet 0.106 otsu 0.472  chip-mean unet 0.195 otsu 0.432
+chips 323  pooled IoU unet 0.056 otsu 0.472  chip-mean unet 0.118 otsu 0.432
+EXIT 0
