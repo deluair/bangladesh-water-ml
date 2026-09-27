@@ -12,7 +12,7 @@ REL = "https://github.com/deluair/bangladesh-water-ml/releases/download/v0.1.0"
 REL_SET = REL if CHECKSET == "v1" else "https://github.com/deluair/bangladesh-water-ml/releases/download/v0.2.0"
 SET_FILE = f"bd_s1_water_checkset_{CHECKSET}.tar.gz"
 SET_SHA = {"v1": "13ae52b3386822c19f34241eeacd92bcd1af4e799ff506129da07d3fc248b145",
-           "v2": "01482b9479f9d846ab57cb0c7baf8b82cc4cf7d191616a880edd9563f88449de"}[CHECKSET]
+           "v2": "7bb45763c138f284a63da473f1db7df880b3fe8ca934f55a519e93e79d39f9af"}[CHECKSET]
 OUT = {"v1": "notebooks/03_bangladesh_checkset_finetune.ipynb",
        "v2": "notebooks/03b_bangladesh_checkset_v2_finetune.ipynb"}[CHECKSET]
 md_v1 = """# 03 · Bangladesh check set: why Sen1Floods11 models fail here, and what fixes it
@@ -34,26 +34,31 @@ Runs on any Colab GPU in about 10 minutes."""
 md_v2 = """# 03b · Bangladesh check set v2 (2019–2023): Sen1Floods11 models, fine-tuning, Otsu
 
 Same protocol as notebook 03, on the larger v2 check set. Notebook 02 trained Sentinel-1 water U-Nets on
-[Sen1Floods11](https://github.com/cloudtostreet/Sen1Floods11); this notebook scores them on **323 Bangladesh chips**, then
+[Sen1Floods11](https://github.com/cloudtostreet/Sen1Floods11); this notebook scores them on **295 Bangladesh chips**, then
 fine-tunes on Bangladesh chips with every chip scored by a model that never saw its tile (or its date).
 
 **Check set** (release asset `bd_s1_water_checkset_v2.tar.gz`): 358 chips of 512 × 512 px, July–October 2019–2023.
 * Radar and label exactly as in v1 (same chipping code; only the search windows differ). Radar and optical scenes 4.5–19.5 h apart.
 * 35 chips were rejected **only for optical defects** (21 unmasked cumulus, 11 cloud shadow labelled water, 3 haze with
   cumulus). The decisions were made by a vision-language model on contact sheets and spot-checked by a second model,
-  not by a person (see `README_QC.md` in the tarball). 323 are kept.
+  not by a person (see `README_QC.md` in the tarball). 323 are kept by QC; 28 of those are the same acquisition
+  reprocessed by ESA to a newer processing baseline and are dropped (`dedupe_dropped.csv`), leaving 295.
 
 **Baseline:** Otsu threshold on VV, fitted per chip.
 
 Five times more chips than v1, so fine-tuning takes about five times longer than notebook 03."""
 md = md_v1 if CHECKSET == "v1" else md_v2
 READING = """**Reading the result.** On check set v2 (release v0.2.0, run with `a2_bd/bd_finetune.py` on an Apple M5 Max GPU),
-the Sen1Floods11 models score 0.266 / 0.161 / 0.106 as trained, against 0.472 for Otsu. Fine-tuning on about 161 Bangladesh
-chips per fold lifts the U-Net to 0.799–0.807, and the encoder's starting point (Sen1Floods11 or ImageNet) changes the result
-by at most 0.003. Scores from this notebook on a CUDA GPU will differ slightly, because GPU arithmetic is not bit-identical
+the Sen1Floods11 models score 0.273 / 0.166 / 0.108 as trained, against 0.468 for Otsu. Fine-tuning on about 147 Bangladesh
+chips per fold lifts the U-Net to 0.803–0.805, and the encoder's starting point (Sen1Floods11 or ImageNet) changes the result
+by at most 0.001. Scores from this notebook on a CUDA GPU will differ slightly, because GPU arithmetic is not bit-identical
 across hardware."""
 DL = "f'{REL}/{f}'" if CHECKSET == "v1" else "(REL_SET if f.endswith('.tar.gz') else REL) + '/' + f"
 REL_LINE = "" if CHECKSET == "v1" else f"\nREL_SET = '{REL_SET}'   # check set v2 is a v0.2.0 asset; weights stay in v0.1.0"
+# v2 only: drop chips that are the same Sentinel-2 acquisition reprocessed by ESA (a2_bd_v2/step2c_dedupe.py)
+DEDUPE = "" if CHECKSET == "v1" else ("""
+if os.path.exists('bd/dedupe_dropped.csv'):
+    dropped = set(pd.read_csv('bd/dedupe_dropped.csv').id); q = q[~q.id.isin(dropped)].reset_index(drop=True)""")
 
 cells = [
     nbf.v4.new_markdown_cell(md),
@@ -82,7 +87,7 @@ q = pd.read_csv('bd/qc_decisions.csv')
 print(q.decision.value_counts().to_dict()); print(q[q.decision != 'keep'].reason.value_counts().to_dict())"""),
     nbf.v4.new_code_cell("""# Kept chips; normalisation = Sen1Floods11 hand-labelled train split (notebook 02)
 MU = np.array([-11.188685, -17.898247], 'float32'); SD = np.array([6.83887, 6.5755134], 'float32')
-q = q[q.decision == 'keep'].reset_index(drop=True)
+q = q[q.decision == 'keep'].reset_index(drop=True)""" + DEDUPE + """
 def rd(p):
     with rasterio.open(p) as d: return d.read()
 X = np.stack([np.nan_to_num(np.clip(rd(f'bd/chips/{i}_S1.tif').astype('float32'), -50, 5), nan=-50.0) for i in q.id])

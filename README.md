@@ -76,9 +76,13 @@ model gets wrong would rig the test. **61 chips remain**, from 19 Sentinel-2 til
 **Check set v2 (release v0.2.0).** The same chipping code, run over five earlier monsoon seasons (July to October,
 2019 to 2023), produced **358 more chips** with radar and optical images 4.5 to 19.5 hours apart. None overlaps the 2024
 set. **35 were rejected**, again only for optical defects (21 with cumulus the cloud mask missed, 11 with cloud shadow
-labelled as water, 3 with haze and cumulus). **323 chips remain**, from 27 Sentinel-2 tiles and 36 dates, spread from
-88.26°E to 92.27°E and 21.59°N to 26.28°N. One difference from v1: the v2 keep/reject decisions were made by an AI
-vision model reading the same contact sheets, with a sample checked by a second AI model, not chip by chip by a person.
+labelled as water, 3 with haze and cumulus), leaving 323 QC-kept chips. Among those, 28 are the same Sentinel-2
+acquisition reprocessed by ESA to a newer baseline (same sensing time, tile and chip number, different processing
+timestamp in the id); for each such pair only the chip built from the latest processing baseline is kept
+(`a2_bd_v2/step2c_dedupe.py`, dropped ids in `a2_bd_v2/dedupe_dropped.csv`). **295 chips remain** in the check set, from
+27 Sentinel-2 tiles and 36 dates, spread from 88.26°E to 92.27°E and 21.59°N to 26.28°N. One difference from v1: the v2
+keep/reject decisions were made by an AI vision model reading the same contact sheets, with a sample checked by a
+second AI model, not chip by chip by a person.
 
 **Step 3, score it.** The score is IoU (intersection over union): the overlap between predicted water and true water,
 divided by their combined area. 1.0 is perfect; 0 is no overlap. It is pooled over all chips. The yardstick is the
@@ -90,7 +94,7 @@ bright pixels and call the dark side water.
 | Sen1Floods11 test split, 90 chips | 0.661 / 0.665 / 0.666 | 0.210 |
 | Bolivia (a country held out of training), 15 chips | 0.648 / 0.698 / 0.697 | 0.351 |
 | **Bangladesh v1 (2024), 61 chips, model used as trained** | **0.235 / 0.147 / 0.092** | **0.525** |
-| **Bangladesh v2 (2019–2023), 323 chips, model used as trained** | **0.266 / 0.161 / 0.106** | **0.472** |
+| **Bangladesh v2 (2019–2023), 295 chips, model used as trained** | **0.273 / 0.166 / 0.108** | **0.468** |
 
 The model that beats Otsu by three times on the world's test set does far worse than Otsu over Bangladesh, in both
 check sets.
@@ -107,7 +111,7 @@ check sets.
 
 Training with deliberately shifted brightness and occasional smoothing (radiometric augmentation) keeps the world
 scores intact but lifts Bangladesh only a little: the three seeds above are that robust version; an earlier run without
-augmentation scores 0.049 on v1 and 0.056 on v2.
+augmentation scores 0.049 on v1 and 0.055 on v2.
 
 **Step 4, teach it Bangladesh.** The fix is to show the model Bangladesh. The 61 chips are split in two groups; the
 model is fine-tuned on one group and scored on the other, then the roles swap, so **every chip is scored by a model that
@@ -115,21 +119,21 @@ never saw it**. The groups are formed by Sentinel-2 tile (so the test chips come
 separately, by date (so they come from days it never saw). On check set v1 each variant ran with three seeds, twice:
 once on an Apple M-series GPU (`a2_bd/bd_finetune.py`) and once on a Colab L4 GPU (notebook 03, as committed). GPU
 arithmetic is not bit-identical across hardware, so the two runs differ slightly. On check set v2 the same script ran
-once per variant, on an Apple M5 Max GPU, with about 161 training chips each time.
+once per variant, on an Apple M5 Max GPU, with about 147 training chips each time.
 
-| Fine-tuning variant | v1 (61 chips): IoU, Apple GPU (mean ± sd, 3 seeds) | v1: IoU, Colab L4 | v1: Otsu | v2 (323 chips): IoU, Apple GPU (mean ± sd, 3 seeds) | v2: Otsu |
+| Fine-tuning variant | v1 (61 chips): IoU, Apple GPU (mean ± sd, 3 seeds) | v1: IoU, Colab L4 | v1: Otsu | v2 (295 chips): IoU, Apple GPU (mean ± sd, 3 seeds) | v2: Otsu |
 |---|---|---|---|---|---|
-| Starting from the Sen1Floods11 model, held-out tiles | **0.815 ± 0.004** | **0.830 ± 0.004** | 0.525 | **0.802 ± 0.008** | 0.472 |
-| Starting from the Sen1Floods11 model, held-out dates | **0.823 ± 0.009** | **0.823 ± 0.009** | 0.525 | **0.805 ± 0.003** | 0.472 |
-| Starting from a generic ImageNet network, held-out tiles | 0.814 ± 0.011 | 0.820 ± 0.004 | 0.525 | 0.799 ± 0.004 | 0.472 |
-| Starting from a generic ImageNet network, held-out dates | 0.809 ± 0.008 | 0.801 ± 0.021 | 0.525 | 0.807 ± 0.002 | 0.472 |
+| Starting from the Sen1Floods11 model, held-out tiles | **0.815 ± 0.004** | **0.830 ± 0.004** | 0.525 | **0.805 ± 0.002** | 0.468 |
+| Starting from the Sen1Floods11 model, held-out dates | **0.823 ± 0.009** | **0.823 ± 0.009** | 0.525 | **0.804 ± 0.002** | 0.468 |
+| Starting from a generic ImageNet network, held-out tiles | 0.814 ± 0.011 | 0.820 ± 0.004 | 0.525 | 0.804 ± 0.004 | 0.468 |
+| Starting from a generic ImageNet network, held-out dates | 0.809 ± 0.008 | 0.801 ± 0.021 | 0.525 | 0.803 ± 0.005 | 0.468 |
 
 About 30 local chips take the model from far below Otsu (0.525) to 0.80–0.83. Whether it starts from the global flood
 model or from a generic image network barely matters (at most 0.022 IoU in either run): **the local labels do the work,
 the global training set adds little here.** That is the practical lesson for anyone mapping floods in Bangladesh with open radar.
 
-Check set v2 repeats the finding on five other monsoon seasons: fine-tuned scores of 0.799–0.807 against Otsu's 0.472,
-and the starting point changes the result by at most 0.003. About five times as many training chips did not lift v2 above v1;
+Check set v2 repeats the finding on five other monsoon seasons: fine-tuned scores of 0.803–0.805 against Otsu's 0.468,
+and the starting point changes the result by at most 0.001. About five times as many training chips did not lift v2 above v1;
 the two sets cover different years and places, so the small gap between them is not a like-for-like comparison.
 
 ### Where AI is and is not used
@@ -149,7 +153,7 @@ decision, its reason and its review batch.
 * **Radar and optical images a day apart** can disagree if water rose or fell in between. Net: pairs are at most 19.5 h
   apart in both check sets; the effect remains a source of noise in both directions.
 * **A small test set** (61 chips) gives wide uncertainty. Net: three seeds, two different ways of holding data out, a
-  fixed baseline on the same chips, and a second, independent check set of 323 chips from 2019 to 2023. The results
+  fixed baseline on the same chips, and a second, independent check set of 295 chips from 2019 to 2023. The results
   are a strong signal, not a precise national accuracy figure.
 * **Tuning on the test set** would inflate scores. Net: the Bangladesh chips were never used to choose settings for the
   global model; fine-tuning scores come only from chips held out of that run.
@@ -194,8 +198,9 @@ Notebooks 02 and 03 are generated by `notebooks/a2/build_nb.py` and `build_nb03.
 | `a2_bd_v2/step1_search.py` | Check set v2 search: as v1, with ten windows (July–August and September–October of 2019 to 2023); chipping (`a2_bd/step2_chips.py`) and QC sheets (`a2_bd/step3_qc.py`) unchanged |
 | `a2_bd_v2/check_pilot_chips.py` | Sanity check of chip files (band count, label values, empty radar) |
 | `a2_bd_v2/index.csv`, `qc_decisions.csv`, `scan_stats.json` | 358 chips; keep/reject with reason and review batch (323 keep: 292 high, 31 low); scan counts |
-| `a2_bd_v2/bd_eval_*.csv`, `bd_eval.log` | Zero-shot scores on the 323 kept v2 chips (`a2_bd/bd_eval.py`, run in the extracted v2 check set) |
-| `a2_bd_v2/bd_finetune_results_*.csv`, `bd_finetune.log` | The four fine-tuning variants on v2 (`a2_bd/bd_finetune.py`, run in the extracted v2 check set with `WEIGHTS` pointing at the v0.1.0 weights) |
+| `a2_bd_v2/step2c_dedupe.py`, `dedupe_dropped.csv` | Among the 323 QC-kept chips, 28 are the same Sentinel-2 acquisition reprocessed by ESA to a newer processing baseline (same sensing time, tile, chip number; different processing timestamp); keeps the latest-baseline chip of each pair, drops the other (id, kept_twin_id); 295 chips remain |
+| `a2_bd_v2/bd_eval_*.csv`, `bd_eval.log` | Zero-shot scores on the 295 deduped, QC-kept v2 chips (`a2_bd/bd_eval.py`, run in the extracted v2 check set; excludes ids in `dedupe_dropped.csv` when present) |
+| `a2_bd_v2/bd_finetune_results_*.csv`, `bd_finetune.log` | The four fine-tuning variants on v2's 295 deduped chips (`a2_bd/bd_finetune.py`, run in the extracted v2 check set with `WEIGHTS` pointing at the v0.1.0 weights) |
 | `a2_bd_v2/numbers.md` | Every v2 figure in this README, mapped to the CSV cells it comes from |
 
 ### Model
@@ -220,7 +225,7 @@ smoothing in linear power. Seeds 20260927, 1, 2.
 
 | File | SHA-256 |
 |---|---|
-| `bd_s1_water_checkset_v2.tar.gz` (611 MB: `chips/` with all 358 chips, `index.csv`, `qc_decisions.csv`, `README_QC.md`) | `01482b9479f9d846ab57cb0c7baf8b82cc4cf7d191616a880edd9563f88449de` |
+| `bd_s1_water_checkset_v2.tar.gz` (611 MB: `chips/` with all 358 chips, `index.csv`, `qc_decisions.csv`, `dedupe_dropped.csv`, `README_QC.md`) | `7bb45763c138f284a63da473f1db7df880b3fe8ca934f55a519e93e79d39f9af` |
 
 The model weights are unchanged and stay attached to release v0.1.0.
 
@@ -254,7 +259,8 @@ derived from (above).
 
 * **Catchment (upland area)**: the land area that drains into a river at a given point; a proxy for river size.
 * **Check set**: the Bangladesh chips used only for testing and, in held-out halves, for fine-tuning: v1 has 61 kept chips
-  from 2024 (checked by a person), v2 has 323 kept chips from 2019 to 2023 (checked by AI models).
+  from 2024 (checked by a person), v2 has 295 chips from 2019 to 2023 (323 kept by AI-model QC, less 28 dropped as
+  the same acquisition reprocessed by ESA).
 * **Chip**: a square cut from a satellite image, here 512 × 512 pixels (about 5 × 5 km).
 * **dB (decibel)**: the logarithmic unit radar brightness is reported in; +3 dB is roughly double the returned energy.
 * **Dice loss**: a training penalty that rewards overlap between predicted and true water, useful when water is a small

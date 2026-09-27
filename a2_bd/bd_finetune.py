@@ -5,6 +5,8 @@ from skimage.filters import threshold_otsu
 MU = np.array([-11.188685, -17.898247], 'float32'); SD = np.array([6.83887, 6.5755134], 'float32')
 dev = 'mps' if torch.backends.mps.is_available() else 'cpu'
 q = pd.read_csv('qc_decisions.csv'); q = q[q.decision == 'keep'].reset_index(drop=True)
+if os.path.exists('dedupe_dropped.csv'):  # v2: chips that are the same ESA acquisition reprocessed, see step2c_dedupe.py
+    dropped = set(pd.read_csv('dedupe_dropped.csv').id); q = q[~q.id.isin(dropped)].reset_index(drop=True)
 q['tile'] = q.id.str.extract(r'_(T\d\d[A-Z]{3})_')[0]
 SPLIT, INIT = os.environ.get("SPLIT", "tile"), os.environ.get("INIT", "s1f11")
 if SPLIT == "date": q["tile"] = q.id.str[3:11]   # group by S2 acquisition date instead of tile

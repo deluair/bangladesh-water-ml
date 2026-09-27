@@ -1,7 +1,10 @@
-import sys, numpy as np, pandas as pd, rasterio, torch, segmentation_models_pytorch as smp
+import sys, os, numpy as np, pandas as pd, rasterio, torch, segmentation_models_pytorch as smp
 from skimage.filters import threshold_otsu
 MU = np.array([-11.188685, -17.898247], 'float32'); SD = np.array([6.83887, 6.5755134], 'float32')  # train-split stats from the Colab run
 q = pd.read_csv(sys.argv[1]); ids = q[q.decision == 'keep'].id.tolist()
+dd = os.path.join(os.path.dirname(sys.argv[1]) or '.', 'dedupe_dropped.csv')  # v2: chips that are the same ESA acquisition reprocessed, see step2c_dedupe.py
+if os.path.exists(dd):
+    dropped = set(pd.read_csv(dd).id); ids = [i for i in ids if i not in dropped]
 m = smp.Unet('resnet34', encoder_weights=None, in_channels=2, classes=1)
 m.load_state_dict(torch.load(sys.argv[2], map_location='cpu')); m.eval()
 def rd(p):
